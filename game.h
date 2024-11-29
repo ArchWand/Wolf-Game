@@ -2,63 +2,49 @@
 #define __GAME_H__
 
 #include <iostream>
-#include <ostream>
 #include <vector>
 #include <unordered_set>
-#include <utility>
 using namespace std;
+
+#include "coord.h"
 
 #define uset unordered_set
 
-typedef struct CoordStruct {
-	int r;
-	int c;
-
-	// Binary addition and subtraction operator for calculating valid moves
-	struct CoordStruct operator+(const struct CoordStruct& other) const {
-		return {r + other.r, c + other.c};
-	}
-
-	struct CoordStruct operator-(const struct CoordStruct& other) const {
-		return {r - other.r, c - other.c};
-	}
-
-	// Equality operator for proper functioning of hash maps and sets
-	bool operator==(const struct CoordStruct& other) const {
-		return r == other.r && c == other.c;
-	}
-
-	// Ostream operator for debugging
-	friend ostream &operator<<(ostream &os, const struct CoordStruct &obj) {
-		os << "(" << obj.r << ", " << obj.c << ")";
-		return os;
-	}
-} coord;
-
-// Custom hash function
-namespace std {
-template <>
-struct hash<coord> {
-	size_t operator()(const coord& key) const {
-		size_t h1 = std::hash<int>{}(key.r);
-		size_t h2 = std::hash<int>{}(key.c);
-		return h1 ^ (h2 << 1);
-	}
-};
-}
-
 class Game {
+public:
+	Game(int turns_remaining, const coord &size, const coord &deer,
+	  const vector<coord> &wolves, const vector<string> &player_names,
+	  const uset<coord> &deer_moves, const uset<coord> &wolf_moves);
+
 private:
-	vector<coord> players;
-	vector<string> player_names;
+	// A representation of the game board, where each position contains the id
+	// of the player there, with -1 representing empty positions.
 	vector<vector<int>> board;
-	// This is how many turns the wolves have to catch the deer before the deer wins
+
+	// This is how many turns the wolves have to catch the deer
 	int turns_remaining;
 
+	// All possible moves for each type of player
+	uset<coord> deer_moves;
+	uset<coord> wolf_moves;
+
+	// Arrays containing the location (and name) of every player. deer and
+	// wolves are pointers into the main players array; in players, all deer are
+	// contiguous and stored at the start, and all wolves are contiguous and
+	// stored at the end.
+	coord *players;
+	string *player_names;
+	size_t playersc;
+
+	coord *deer;
+	size_t deerc;
+	coord *wolves;
+	size_t wolvesc;
+
+private:
+	// Helper functions
 	bool in_bounds(const coord &pos);
 	bool valid_move(int id, const coord &pos);
-	void update_mask(vector<vector<int>> &mask, const coord &orig,
-				  const uset<coord> &moves, int step);
 
 	// Use int instead of bool for compatibility with print_board helper
 	vector<vector<int>> wolf_mask;
@@ -71,12 +57,6 @@ private:
 	const void print_board(const vector<vector<int>> &board, string (Game::*int_repr)(int));
 
 public:
-
-	// move lists
-	uset<coord> deer_moves;
-	uset<coord> wolf_moves;
-
-	Game(int turns_remaining, const coord &size, const coord &deer, const vector<coord> &wolves, const vector<string> &player_names, const uset<coord> &deer_moves, const uset<coord> &wolf_moves);
 	bool move(int id, const coord &pos);
 	bool move_wolf(int wolf, const coord &pos);
 	bool move_deer(const coord &pos);

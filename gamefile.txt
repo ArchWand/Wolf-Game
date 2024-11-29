@@ -1,4 +1,4 @@
-board 13 13
+set dimensions 13 13
 set deer_turns_to_win 14
 set deer_moves 3 3 [
 ..X.X..
@@ -29,8 +29,8 @@ create wolf ArcWand F13
 create wolf Have H13
 create wolf Vulpine J13
 create wolf luna L13
+game start
 
-# Game start
 move Campfire E9
 move Testy K9
 move lambda I9

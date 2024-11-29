@@ -19,6 +19,7 @@ using namespace std;
 // Map from name to player id
 umap<string, int> names;
 
+// Covert an alphabetical column label into the column number (e.g. 'AC' == 28)
 int Atoi(string alph) {
 	// Read into a vector of numbers
 	vector<int> v;
@@ -43,6 +44,9 @@ int Atoi(string alph) {
 	return n;
 }
 
+// Convert alphanumeric coordinates into a coord struct (e.g. 'C11' == (10, 2))
+// Note that alphanumeric coordinates have the column first and are 1-indexed,
+// while coords have the row first and are 0-indexed.
 coord atoc(string s) {
 	coord c;
 	string alph = "";
@@ -52,12 +56,17 @@ coord atoc(string s) {
 		if ('0' <= s[i] && s[i] <= '9') { break; }
 		alph.push_back(s[i]);
 	}
-	// Alphanumeric coordinates are 1-indexed, but we use 0-indexed arrays
+	// We use 0-indexed arrays
 	c.r = stoi(s.substr(i)) - 1;
 	c.c = Atoi(alph);
 	return c;
 }
 
+// Helper function to parse the moves arrays. The valid moves of a player type
+// are passed in as an array, and thus must be handled specially since the main
+// parsing function breaks up each line.
+// NOTE: Should consider refactoring this into a `get_array()` function and
+// keeping most of the logic in the main parsing function.
 void parse_moves(istream &in, istream &toks, uset<coord> &moves, int &line_num) {
 	// Read origin row and col
 	int o_r, o_c;
@@ -102,6 +111,7 @@ void parse_moves(istream &in, istream &toks, uset<coord> &moves, int &line_num) 
 	in >> skipws;
 }
 
+// Parse the given file, and create and play a game.
 Game *parse_gamefile(istream &in) {
 	int deer_turns_to_win;
 	coord size;
@@ -110,6 +120,8 @@ Game *parse_gamefile(istream &in) {
 	vector<string> player_names(1, ""); // Placeholder for deer name
 	uset<coord> deer_moves;
 	uset<coord> wolf_moves;
+
+	Game *g;
 
 	// ((id, coord), line num)
 	// Line num passed for error handling
@@ -125,11 +137,11 @@ Game *parse_gamefile(istream &in) {
 		// Parse valid commands
 		if (t == "#" || t == "//" || t == "") {
 			// Ignore comments or blank lines
-		} else if (t == "board") {
-			toks >> size.r >> size.c;
 		} else if (t == "set") {
 			toks >> t;
-			if (t == "deer_turns_to_win") {
+			if (t == "dimensions") {
+				toks >> size.r >> size.c;
+			} else if (t == "deer_turns_to_win") {
 				toks >> deer_turns_to_win;
 			} else if (t == "deer_moves") {
 				parse_moves(in, toks, deer_moves, i);
@@ -163,6 +175,28 @@ Game *parse_gamefile(istream &in) {
 			} else {
 				error("line %d: Found '%s'. Valid entities to create are ['deer', 'wolf']", i, t.c_str());
 			}
+		} else if (t == "game") {
+			toks >> t;
+			if (t == "start") {
+				// Create the game
+				g = new Game(deer_turns_to_win, size, deer, wolves, player_names, deer_moves, wolf_moves);
+				break;
+			} else {
+				error("line %d: Invalid game command %s", i, t.c_str());
+			}
+		} else {
+			error("line %d: No command named %s", i, t.c_str());
+			exit(1);
+		}
+	}
+
+	for (int i = 1; getline(in, cmd); i++) {
+		stringstream toks(cmd);
+		string t;
+		toks >> t;
+
+		if (t == "#" || t == "//" || t == "") {
+			// Ignore comments or blank lines
 		} else if (t == "move") {
 			toks >> t;
 			// Failed to find a player with that name
@@ -173,23 +207,9 @@ Game *parse_gamefile(istream &in) {
 			toks >> t;
 			coord c = atoc(t);
 			move_list.emplace_back(make_pair(id, c), i);
-		} else {
-			error("line %d: No command named %s", i, t.c_str());
-			exit(1);
 		}
 	}
 
-	// Create the game and make moves
-	Game *g = new Game(deer_turns_to_win, size, deer, wolves, player_names, deer_moves, wolf_moves);
-	for (auto pp : move_list) {
-		auto p = pp.first;
-		int id = p.first;
-		coord c = p.second;
-		int line = pp.second;
-		if (!g->move(id, c)) {
-			error("line %d: Invalid move", line);
-		}
-	}
 	return g;
 }
 
