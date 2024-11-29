@@ -1,0 +1,71 @@
+board 13 13
+set deer_turns_to_win 14
+set deer_moves 3 3 [
+..X.X..
+.X...X.
+X..X..X
+..X.X..
+X..X..X
+.X...X.
+..X.X..
+]
+set wolf_moves 2 2 [
+..X..
+.X.X.
+X.X.X
+.X.X.
+..X..
+]
+create deer Science! G3
+create wolf whfg A11
+create wolf verbina C11
+create wolf Campfire E11
+create wolf vmark G11
+create wolf lambda I11
+create wolf Testy K11
+create wolf gray B13
+create wolf Cyrus D13
+create wolf ArcWand F13
+create wolf Have H13
+create wolf Vulpine J13
+create wolf luna L13
+
+# Game start
+move Campfire E9
+move Testy K9
+move lambda I9
+move luna L11
+move verbina C9
+move Cyrus D11
+move ArcWand F11
+move Have H11
+move Vulpine J11
+move vmark G9
+move whfg A9
+
+# Day 2
+move Science! G2
+move Science! E4
+move Testy K7 awoo!
+move lambda I7 meow!
+move verbina C7 beep!
+move Cyrus C10
+move Campfire E7 bark!
+move vmark h8
+move ArcWand E10 woof!
+move luna K10 hiss!
+move Vulpine I10 aaaa!
+move gray B11 owo!
+move Have H9 Grrr
+
+# Day 3
+move Science! F4
+move Science! I3 stamp.
+move luna K8 hiss!
+move lambda I5 hiss!
+move Vulpine I8
+move gray B9
+move Cyrus C8
+move ArcWand E8
+move Campfire F8
+
