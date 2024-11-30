@@ -11,56 +11,13 @@
 using namespace std;
 
 #include "game.h"
+#include "utils.h"
 
 #define umap unordered_map
 #define uset unordered_set
-#define error(...) printf("Error: "); printf(__VA_ARGS__); cout << endl; exit(1);
 
 // Map from name to player id
 umap<string, int> names;
-
-// Covert an alphabetical column label into the column number (e.g. 'AC' == 28)
-int Atoi(string alph) {
-	// Read into a vector of numbers
-	vector<int> v;
-	for (int i = 0; i < alph.size(); i++) {
-		char c = alph[i];
-		int x;
-		if ('A' <= c && c <= 'Z') {
-			x = c - 'A';
-		} else if ('a' <= c && c <= 'z') {
-			x = c - 'a';
-		} else {
-			error("atoi: failed to convert '%s'", alph.c_str());
-		}
-		v.push_back(x);
-	}
-
-	// Convert into a value
-	int n = 0;
-	for (int i = v.size() - 1; i >= 0; i--) {
-		n = n * 26 + v[i];
-	}
-	return n;
-}
-
-// Convert alphanumeric coordinates into a coord struct (e.g. 'C11' == (10, 2))
-// Note that alphanumeric coordinates have the column first and are 1-indexed,
-// while coords have the row first and are 0-indexed.
-coord atoc(string s) {
-	coord c;
-	string alph = "";
-	int i;
-	for (i = 0; i < s.size(); i++) {
-		// Switch over to the number portion
-		if ('0' <= s[i] && s[i] <= '9') { break; }
-		alph.push_back(s[i]);
-	}
-	// We use 0-indexed arrays
-	c.r = stoi(s.substr(i)) - 1;
-	c.c = Atoi(alph);
-	return c;
-}
 
 // Helper function to parse the moves arrays. The valid moves of a player type
 // are passed in as an array, and thus must be handled specially since the main
@@ -123,13 +80,10 @@ Game *parse_gamefile(istream &in) {
 
 	Game *g;
 
-	// ((id, coord), line num)
-	// Line num passed for error handling
-	vector<pair<pair<int, coord>, int>> move_list;
-
 	// Parse the file
 	string cmd;
-	for (int i = 1; getline(in, cmd); i++) {
+	int line;
+	for (line = 1; getline(in, cmd); line++) {
 		stringstream toks(cmd);
 		string t;
 		toks >> t;
@@ -144,18 +98,18 @@ Game *parse_gamefile(istream &in) {
 			} else if (t == "deer_turns_to_win") {
 				toks >> deer_turns_to_win;
 			} else if (t == "deer_moves") {
-				parse_moves(in, toks, deer_moves, i);
+				parse_moves(in, toks, deer_moves, line);
 			} else if (t == "wolf_moves") {
-				parse_moves(in, toks, wolf_moves, i);
+				parse_moves(in, toks, wolf_moves, line);
 			} else {
-				error("line %d: No setting named %s", i, t.c_str());
+				error("line %d: No setting named %s", line, t.c_str());
 			}
 		} else if (t == "create") {
 			toks >> t;
 			if (t == "deer") {
 				static bool deer_created = false;
 				if (deer_created) {
-					error("line %d: Only one deer is allowed", i);
+					error("line %d: Only one deer is allowed", line);
 				}
 
 				// Add the name
@@ -173,7 +127,7 @@ Game *parse_gamefile(istream &in) {
 				toks >> t;
 				wolves.push_back(atoc(t));
 			} else {
-				error("line %d: Found '%s'. Valid entities to create are ['deer', 'wolf']", i, t.c_str());
+				error("line %d: Found '%s'. Valid entities to create are ['deer', 'wolf']", line, t.c_str());
 			}
 		} else if (t == "game") {
 			toks >> t;
@@ -182,31 +136,59 @@ Game *parse_gamefile(istream &in) {
 				g = new Game(deer_turns_to_win, size, deer, wolves, player_names, deer_moves, wolf_moves);
 				break;
 			} else {
-				error("line %d: Invalid game command %s", i, t.c_str());
+				error("line %d: Invalid game command %s", line, t.c_str());
 			}
 		} else {
-			error("line %d: No command named %s", i, t.c_str());
+			error("line %d: No command named %s", line, t.c_str());
 			exit(1);
 		}
 	}
+	line++;
 
-	for (int i = 1; getline(in, cmd); i++) {
+	for (; getline(in, cmd); line++) {
 		stringstream toks(cmd);
 		string t;
 		toks >> t;
 
 		if (t == "#" || t == "//" || t == "") {
 			// Ignore comments or blank lines
-		} else if (t == "move") {
+		} else if (t == "game") {
 			toks >> t;
-			// Failed to find a player with that name
-			if (names.find(t) == names.end()) {
-				error("line %d: No player named %s", i, t.c_str());
+			if (t == "show") {
+				toks >> t;
+				if (t == "board" || t == "") {
+					g->print_board();
+				} else if (t == "deer_cover") {
+					g->print_deer_cover();
+				} else if (t == "wolf_cover") {
+					g->print_wolf_cover();
+				} else if (t == "combined_cover") {
+					g->print_combined_cover();
+				} else {
+					error("line %d: Invalid show subcommand %s", line, t.c_str());
+				}
+			} else {
+				error("line %d: Invalid game command %s", line, t.c_str());
 			}
-			int id = names[t];
-			toks >> t;
+		} else if (t == "move") {
+			string name;
+			toks >> name >> t;
+			// Failed to find a player with that name
+			if (names.find(name) == names.end()) {
+				error("line %d: No player named %s", line, t.c_str());
+			}
+			int id = names[name];
 			coord c = atoc(t);
-			move_list.emplace_back(make_pair(id, c), i);
+			if (!g->move(id, c)) {
+				coord o = g->get_deer();
+				// Cannot call .c_str() on function return
+				string o_col = itoc(o.c);
+				string col = itoc(c.c);
+				error("line %d: Invalid move %s from %s%d to %s%d", line, name.c_str(), o_col.c_str(), o.r+1, col.c_str(), c.r+1);
+			}
+		} else {
+			error("line %d: No command named %s", line, t.c_str());
+			exit(1);
 		}
 	}
 

@@ -41,22 +41,16 @@ private:
 	coord *wolves;
 	size_t wolvesc;
 
-private:
-	// Helper functions
-	bool in_bounds(const coord &pos);
-	bool valid_move(int id, const coord &pos);
-
 	// Use int instead of bool for compatibility with print_board helper
 	vector<vector<int>> wolf_mask;
 	vector<vector<int>> get_deer_mask(bool show_wolves);
 
-	string int2player(int i);
-	string int2deer_reach(int i);
-	string int2bool(int i);
-
-	const void print_board(const vector<vector<int>> &board, string (Game::*int_repr)(int));
-
 public:
+	// Getters and setters
+
+	const coord get_deer();
+	const coord get_wolf(int id);
+
 	bool move(int id, const coord &pos);
 	bool move_wolf(int wolf, const coord &pos);
 	bool move_deer(const coord &pos);
@@ -66,6 +60,17 @@ public:
 	void print_deer_cover();
 	void print_wolf_cover();
 	void print_combined_cover();
+
+private:
+	// Helper functions
+	bool in_bounds(const coord &pos);
+	int valid_move(int id, const coord &pos);
+
+	string int2player(int i);
+	string int2deer_reach(int i);
+	string int2bool(int i);
+
+	const void print_board(const vector<vector<int>> &board, string (Game::*int_repr)(int));
 };
 
 #endif

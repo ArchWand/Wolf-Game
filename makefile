@@ -1,4 +1,4 @@
-SRC=run.cpp game.cpp
+SRC=run.cpp game.cpp utils.cpp
 
 out: ${SRC}
 	g++ ${SRC} -o out

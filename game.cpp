@@ -2,65 +2,48 @@
 #include <iomanip>
 #include <queue>
 
+#include "utils.h"
+
 /**
  * Helpers
  */
-
-int log_floor(int base, int val) {
-	int i = 0;
-	while (val /= base) i++;
-	return i;
-}
-
-// Convert a number into the appropriate alphabetic representation
-// (e.g. 28 == "AC")
-string itoc(int i) {
-	string s = "";
-	do {
-		s += 'A' + (i % 26);
-	} while (i /= 26);
-
-	string rev = "";
-	for (int i = s.size(); i >= 0; i--) rev += s[i];
-	return rev;
-}
 
 bool Game::in_bounds(const coord &pos) {
 	return 0 <= pos.r && pos.r < board.size()
 		&& 0 <= pos.c && pos.c < board[0].size();
 }
 
-bool Game::valid_move(int id, const coord &pos) {
+int Game::valid_move(int id, const coord &pos) {
 	// Check that this is a valid player id
-	if (!(0 <= id && id <= playersc)) { return false; }
+	if (!(0 <= id && id <= playersc)) { return -1; }
 
 	// Check that the position is in the board
-	if (!in_bounds(pos)) { return false; }
+	if (!in_bounds(pos)) { return -2; }
 
 	// Check that the position is not occupied by someone else
 	if (board[pos.r][pos.c] != -1) {
 		if (board[pos.r][pos.c] == id) {
 			// Occupied by self; no move
-			return true;
+			return 0;
 		} else {
 			// Occupied by someone else
-			return false;
+			return -3;
 		}
 	}
 
 	// If the position is covered by a wolf, it is invalid for a deer
 	if (id < deerc && wolf_mask[pos.r][pos.c]) {
-		return false;
+		return -4;
 	}
 
 	// Check that the player is allowed to move there
 	uset<coord> *moves;
 	moves = (id < deerc) ? &deer_moves : &wolf_moves;
 	if (moves->find(pos - players[id]) == moves->end()) {
-		return false;
+		return -5;
 	}
 
-	return true;
+	return 0;
 }
 
 // Print methods. Called for each position in the board.
@@ -212,16 +195,36 @@ vector<vector<int>> Game::get_deer_mask(bool show_wolves) {
 	return mask;
 }
 
+/**
+ * Getters and Setters
+ */
+
+const coord Game::get_deer() { return deer[0]; }
+const coord Game::get_wolf(int id) {
+	if (!(0 <= id && id <= playersc)) { error("Invalid ID for a wolf"); }
+	return wolves[id];
+}
+
 // Given an id and a position, make the move if it is valid.
 bool Game::move(int id, const coord &pos) {
 	// Check that this is a valid move
-	if (!valid_move(id, pos)) { return false; }
+	int e;
+	if ((e = valid_move(id, pos)) < 0) {
+		switch (e) {
+			case -1: cout << "Invalid ID" << endl; break;
+			case -2: cout << "Not in bounds" << endl; break;
+			case -3: cout << "Position occupied" << endl; break;
+			case -4: cout << "Deer in check" << endl; break;
+			case -5: cout << "Not in move set" << endl; break;
+		}
+		return false;
+	}
 
 	// Move the player
 	// Remove the player
 	board[players[id].r][players[id].c] = -1;
 	// If the player is a wolf, remove its effect from the mask
-	if (id < deerc) {
+	if (id >= deerc) {
 		for (coord delta : wolf_moves) {
 			coord c = players[id] + delta;
 			if (!in_bounds(c)) { continue; }
@@ -265,10 +268,10 @@ const void Game::print_board(const vector<vector<int>> &board, string (Game::*in
 	if (sep == "") {
 		sep = "   ";
 		for (int i = 0; i < r_mark_w; i++) { sep += ' '; }
-		sep += '-';
+		sep += '+';
 		for (int i = 0; i < board[0].size(); i++) {
-			sep += "---";
 			for (int j = 0; j < c_mark_w; j++) { sep += "-"; }
+			sep += "--+";
 		}
 		sep += '\n';
 	}
