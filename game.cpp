@@ -302,7 +302,7 @@ const void Game::print_board(const vector<vector<int>> &board, string (Game::*in
 			}
 			cout << "|";
 		}
-		cout << "\n" << sep;
+		cout << setw(r_mark_w+1) << right << r+1 << "\n" << sep;
 	}
 	cout << col_mark << endl;
 }
