@@ -17,6 +17,7 @@ public:
 	Game(int turns_remaining, const coord &size, const coord &deer,
 	  const vector<coord> &wolves, const vector<string> &player_names,
 	  const uset<coord> &deer_moves, const uset<coord> &wolf_moves);
+	~Game();
 
 private:
 	// A representation of the game board, where each position contains the id
@@ -50,6 +51,7 @@ private:
 public:
 	// Getters and setters
 
+	const coord get_player(int id);
 	const coord get_deer();
 	const coord get_wolf(int id);
 

@@ -180,7 +180,7 @@ Game *parse_gamefile(istream &in) {
 			int id = names[name];
 			coord c = atoc(t);
 			if (!g->move(id, c)) {
-				coord o = g->get_deer();
+				coord o = g->get_player(id);
 				// Cannot call .c_str() on function return
 				string o_col = itoc(o.c);
 				string col = itoc(c.c);

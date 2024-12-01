@@ -60,6 +60,12 @@ coord atoc(string s) {
 		if ('0' <= s[i] && s[i] <= '9') { break; }
 		alph.push_back(s[i]);
 	}
+
+	// Make sure that a number is given
+	if (i == s.size()) {
+		error("atoc: tried to convert '%s' to coordinates, but number is missing.", s.c_str());
+	}
+
 	// We use 0-indexed arrays
 	c.r = stoi(s.substr(i)) - 1;
 	c.c = Atoi(alph);

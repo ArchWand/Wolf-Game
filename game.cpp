@@ -82,7 +82,7 @@ string Game::int2wolf_reach(int i) {
 }
 
 /**
- * Constructor
+ * Constructor and Destructor
  */
 
 Game::Game(int turns_remaining, const coord &size, const coord &deer,
@@ -127,6 +127,11 @@ Game::Game(int turns_remaining, const coord &size, const coord &deer,
 			wolf_mask[c.r][c.c]++;
 		}
 	}
+}
+
+Game::~Game() {
+	delete[] players;
+	delete[] player_names;
 }
 
 // The deer cover is a calculated property because deer move in hard to
@@ -188,6 +193,7 @@ vector<vector<int>> Game::get_deer_mask(bool show_wolves) {
  * Getters and Setters
  */
 
+const coord Game::get_player(int id) { return players[id]; }
 const coord Game::get_deer() { return deer[0]; }
 const coord Game::get_wolf(int id) {
 	if (!(0 <= id && id <= playersc)) { error("Invalid ID for a wolf"); }

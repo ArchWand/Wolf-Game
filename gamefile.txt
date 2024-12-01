@@ -91,4 +91,4 @@ move Have G6
 move Science! D3
 move Science! C3 snort.
 
-game show wolf_cover
+game show combined_cover
