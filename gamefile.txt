@@ -68,4 +68,27 @@ move gray B9
 move Cyrus C8
 move ArcWand E8
 move Campfire F8
+move verbina D8 boop!
+move Testy L8
+move Have G8
+move whfg B8
 
+# Day 4
+move Science! F4
+move Science! G4
+move lambda J6 snarl!
+move vmark H6
+move ArcWand E6
+move Testy L6 grrr!
+move Campfire F6 bark!
+move Cyrus C6
+move Vulpine I6
+move verbina D6 beep!
+move luna K6 hiss!
+move Have G6
+
+# Day 5
+move Science! D3
+move Science! C3 snort.
+
+game show wolf_cover

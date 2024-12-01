@@ -175,7 +175,7 @@ Game *parse_gamefile(istream &in) {
 			toks >> name >> t;
 			// Failed to find a player with that name
 			if (names.find(name) == names.end()) {
-				error("line %d: No player named %s", line, t.c_str());
+				error("line %d: No player named %s", line, name.c_str());
 			}
 			int id = names[name];
 			coord c = atoc(t);
@@ -204,9 +204,5 @@ int main(int argc, char **argv) {
 	} else {
 		g = parse_gamefile(cin);
 	}
-
-	g->print_deer_cover();
-	g->print_wolf_cover();
-	g->print_combined_cover();
 	delete g;
 }

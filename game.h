@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include <unordered_set>
 using namespace std;
 
 #include "coord.h"
 
+#define umap unordered_map
 #define uset unordered_set
 
 class Game {
@@ -68,7 +70,7 @@ private:
 
 	string int2player(int i);
 	string int2deer_reach(int i);
-	string int2bool(int i);
+	string int2wolf_reach(int i);
 
 	const void print_board(const vector<vector<int>> &board, string (Game::*int_repr)(int));
 };

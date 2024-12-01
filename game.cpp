@@ -55,14 +55,8 @@ string Game::int2player(int i) {
 	switch (i) {
 		case -1:
 			return "   ";
-			break;
 		default:
-			if (0 <= i && i < playersc) {
-				return player_names[i].substr(0, 3);
-			} else {
-				// Unindentifiable
-				return "???";
-			}
+			return "???";
 	}
 }
 
@@ -70,25 +64,20 @@ string Game::int2deer_reach(int i) {
 	switch (i) {
 		case -1:
 			return "   ";
-			break;
 		case 0:
 			return " O ";
-			break;
 		case 1:
 			return " . ";
-			break;
 		case 2:
 			return "(-)";
-			break;
 		case -2:
-			// Covered by wolf
-			return "<X>";
+			return "<X>"; // Covered by wolf
 		default:
 			return "???";
 	}
 }
 
-string Game::int2bool(int i) {
+string Game::int2wolf_reach(int i) {
 	return i ? "<X>" : "   ";
 }
 
@@ -263,6 +252,12 @@ const void Game::print_board(const vector<vector<int>> &board, string (Game::*in
 	int r_mark_w = log_floor(10, board.size()) + 1;
 	int c_mark_w = log_floor(26, board[0].size()) + 1;
 
+	// Calculate player positions to print their names
+	umap<coord, int> locs;
+	for (int i = 0; i < playersc; i++) {
+		locs[players[i]] = i;
+	}
+
 	// Create row separator and column markers
 	static string sep = "";
 	if (sep == "") {
@@ -293,7 +288,13 @@ const void Game::print_board(const vector<vector<int>> &board, string (Game::*in
 	for (int r = 0; r < board.size(); r++) {
 		cout << setw(r_mark_w+2) << right << r+1 << " |";
 		for (int c = 0; c < board[0].size(); c++) {
-			cout << (this->*int_repr)(board[r][c]) << "|";
+			auto it = locs.find({r, c});
+			if (it != locs.end()) {
+				cout << player_names[(*it).second].substr(0, 3);
+			} else {
+				cout << (this->*int_repr)(board[r][c]);
+			}
+			cout << "|";
 		}
 		cout << "\n" << sep;
 	}
@@ -301,5 +302,5 @@ const void Game::print_board(const vector<vector<int>> &board, string (Game::*in
 }
 void Game::print_board() { print_board(board, &Game::int2player); }
 void Game::print_deer_cover() { print_board(get_deer_mask(false), &Game::int2deer_reach); }
-void Game::print_wolf_cover() { print_board(wolf_mask, &Game::int2bool); }
+void Game::print_wolf_cover() { print_board(wolf_mask, &Game::int2wolf_reach); }
 void Game::print_combined_cover() { print_board(get_deer_mask(true), &Game::int2deer_reach); }
