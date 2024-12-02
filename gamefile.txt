@@ -88,7 +88,27 @@ move luna K6 hiss!
 move Have G6
 
 # Day 5
-move Science! D3
-move Science! C3 snort.
+move Science! F1
+move Science! D3 snort.
+move Testy L4 Advance!" cries Testera, in that ancient wolf-language that deer cannot speak but instinctively understand, the way all mortals know death.
+move whfg B6
+move lambda J4
+move verbina D4 snap! (but it failed!)
+move ArcWand E4 bark! bark! bark! bark! bark
+move luna K4 snarl!
+move Campfire F4 bark! bark! bark!
+move Vulpine I4 whatever
+move Have G4 blorp!
+move Cyrus C4 [explodes]
+
+# Day 6
+move Science! A2
+move Science! A3
+game show deer_cover
+move whfg B4
+move Cyrus C2
+move verbina D2
+move ArcWand C4
 
 game show combined_cover
+game show deer_cover
