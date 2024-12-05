@@ -109,6 +109,7 @@ move whfg B4
 move Cyrus C2
 move verbina D2
 move ArcWand C4
+move gray B7
 
 game show combined_cover
 game show deer_cover
