@@ -1,5 +1,7 @@
 #include "utils.h"
 
+struct CoordStruct;
+
 int log_floor(int base, int val) {
 	int i = 0;
 	while (val /= base) i++;
@@ -8,8 +10,8 @@ int log_floor(int base, int val) {
 
 // Convert a number into the appropriate alphabetic representation
 // (e.g. 28 == "AC")
-string itoc(int i) {
-	string s = "";
+std::string itoc(int i) {
+	std::string s = "";
 	do {
 		s += 'A' + (i % 26);
 	} while (i /= 26);
@@ -24,9 +26,9 @@ string itoc(int i) {
 }
 
 // Covert an alphabetical column label into the column number (e.g. 'AC' == 28)
-int Atoi(string alph) {
+int Atoi(std::string alph) {
 	// Read into a vector of numbers
-	vector<int> v;
+	std::vector<int> v;
 	for (int i = 0; i < alph.size(); i++) {
 		char c = alph[i];
 		int x;
@@ -51,9 +53,9 @@ int Atoi(string alph) {
 // Convert alphanumeric coordinates into a coord struct (e.g. 'C11' == (10, 2))
 // Note that alphanumeric coordinates have the column first and are 1-indexed,
 // while coords have the row first and are 0-indexed.
-coord atoc(string s) {
+coord atoc(std::string s) {
 	coord c;
-	string alph = "";
+	std::string alph = "";
 	int i;
 	for (i = 0; i < s.size(); i++) {
 		// Switch over to the number portion
