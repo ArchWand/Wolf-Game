@@ -1,6 +1,7 @@
-SRC=run.cpp game.cpp utils.cpp
+SRC=*.cpp
+H=*.h
 
-out: ${SRC}
+out: ${SRC} ${H}
 	g++ ${SRC} -o out
 
 .PHONY: debug

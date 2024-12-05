@@ -7,7 +7,28 @@
 #include <unordered_set>
 using namespace std;
 
-#include "coord.h"
+#include "utils.h"
+
+enum GameException {
+	DeerOutOfBounds = 0,
+	WolfOutOfBounds = 1,
+};
+
+enum MoveError {
+	SUCCESS = 0,
+	INVALID_ID,
+	ALREADY_MOVED,
+	OUT_OF_BOUNDS,
+	POSITION_OCCUPIED,
+	DEER_IN_CHECK,
+	INVALID_MOVE,
+};
+
+enum GameState {
+	ONGOING = 0,
+	DEER_VICTORY,
+	WOLF_VICTORY,
+};
 
 #define umap unordered_map
 #define uset unordered_set
@@ -24,13 +45,6 @@ private:
 	// of the player there, with -1 representing empty positions.
 	vector<vector<int>> board;
 
-	// This is how many turns the wolves have to catch the deer
-	int turns_remaining;
-
-	// All possible moves for each type of player
-	uset<coord> deer_moves;
-	uset<coord> wolf_moves;
-
 	// Arrays containing the location (and name) of every player. deer and
 	// wolves are pointers into the main players array; in players, all deer are
 	// contiguous and stored at the start, and all wolves are contiguous and
@@ -43,6 +57,16 @@ private:
 	size_t deerc;
 	coord *wolves;
 	size_t wolvesc;
+
+	// This is how many turns the wolves have to catch the deer
+	int turns_remaining;
+
+	// Tracks whether or not a particular wolf has moved already
+	bool *moved;
+
+	// All possible moves for each type of player
+	uset<coord> deer_moves;
+	uset<coord> wolf_moves;
 
 	// Use int instead of bool for compatibility with print_board helper
 	vector<vector<int>> wolf_mask;
@@ -59,6 +83,8 @@ public:
 	bool move_wolf(int wolf, const coord &pos);
 	bool move_deer(const coord &pos);
 
+	GameState game_over();
+
 	// Game state printers
 	void print_board();
 	void print_deer_cover();
@@ -67,6 +93,7 @@ public:
 
 private:
 	// Helper functions
+	bool is_wolf(int id);
 	bool in_bounds(const coord &pos);
 	int valid_move(int id, const coord &pos);
 

@@ -4,6 +4,11 @@
 
 #include "utils.h"
 
+#define id2d(a) (a)
+#define id2w(a) (a - deerc)
+#define d2id(a) (a)
+#define w2id(a) (a + deerc)
+
 /**
  * Helpers
  */
@@ -13,12 +18,19 @@ bool Game::in_bounds(const coord &pos) {
 		&& 0 <= pos.c && pos.c < board[0].size();
 }
 
+bool Game::is_wolf(int id) {
+	return id >= deerc;
+}
+
 int Game::valid_move(int id, const coord &pos) {
 	// Check that this is a valid player id
-	if (!(0 <= id && id <= playersc)) { return -1; }
+	if (!(0 <= id && id <= playersc)) { return INVALID_ID; }
+
+	// Check that a wolf is not trying to move twice in one turn
+	if (is_wolf(id) && moved[id]) { return ALREADY_MOVED; }
 
 	// Check that the position is in the board
-	if (!in_bounds(pos)) { return -2; }
+	if (!in_bounds(pos)) { return OUT_OF_BOUNDS; }
 
 	// Check that the position is not occupied by someone else
 	if (board[pos.r][pos.c] != -1) {
@@ -27,23 +39,19 @@ int Game::valid_move(int id, const coord &pos) {
 			return 0;
 		} else {
 			// Occupied by someone else
-			return -3;
+			return POSITION_OCCUPIED;
 		}
 	}
 
 	// If the position is covered by a wolf, it is invalid for a deer
-	if (id < deerc && wolf_mask[pos.r][pos.c]) {
-		return -4;
-	}
+	if (id < deerc && wolf_mask[pos.r][pos.c]) { return DEER_IN_CHECK; }
 
 	// Check that the player is allowed to move there
 	uset<coord> *moves;
 	moves = (id < deerc) ? &deer_moves : &wolf_moves;
-	if (moves->find(pos - players[id]) == moves->end()) {
-		return -5;
-	}
+	if (!in_set(*moves, pos - players[id])) { return INVALID_MOVE; }
 
-	return 0;
+	return SUCCESS;
 }
 
 // Print methods. Called for each position in the board.
@@ -62,18 +70,12 @@ string Game::int2player(int i) {
 
 string Game::int2deer_reach(int i) {
 	switch (i) {
-		case -1:
-			return "   ";
-		case 0:
-			return " O ";
-		case 1:
-			return " . ";
-		case 2:
-			return "(-)";
-		case -2:
-			return "<X>"; // Covered by wolf
-		default:
-			return "???";
+		case -1: return "   ";
+		case 0: return " O ";
+		case 1: return " . ";
+		case 2: return "(-)";
+		case -2: return "<X>"; // Covered by wolf
+		default: return "???";
 	}
 }
 
@@ -99,6 +101,7 @@ Game::Game(int turns_remaining, const coord &size, const coord &deer,
 	this->players = new coord[deerc + wolvesc];
 	this->deer = this->players;
 	this->wolves = this->players + deerc;
+	this->moved = new bool[deerc + wolvesc];
 
 	// Copy names
 	this->player_names = new string[deerc + wolvesc];
@@ -110,6 +113,7 @@ Game::Game(int turns_remaining, const coord &size, const coord &deer,
 	this->players[0] = deer;
 	if (!in_bounds(deer)) {
 		cout << deer << " is not in bounds" << endl;
+		throw DeerOutOfBounds;
 	}
 	board[deer.r][deer.c] = 0;
 
@@ -118,19 +122,25 @@ Game::Game(int turns_remaining, const coord &size, const coord &deer,
 		this->wolves[i] = wolves[i];
 		if (!in_bounds(wolves[i])) {
 			cout << wolves[i] << " is not in bounds" << endl;
+			throw WolfOutOfBounds;
 		}
 		board[wolves[i].r][wolves[i].c] = i + 1;
+
 		// Update the coverage information
 		for (coord delta : wolf_moves) {
 			coord c = wolves[i] + delta;
 			if (!in_bounds(c)) { continue; }
 			wolf_mask[c.r][c.c]++;
 		}
+
+		// Wolves move first
+		moved[w2id(i)] = 0;
 	}
 }
 
 Game::~Game() {
 	delete[] players;
+	delete[] moved;
 	delete[] player_names;
 }
 
@@ -204,13 +214,14 @@ const coord Game::get_wolf(int id) {
 bool Game::move(int id, const coord &pos) {
 	// Check that this is a valid move
 	int e;
-	if ((e = valid_move(id, pos)) < 0) {
+	if ((e = valid_move(id, pos)) != SUCCESS) {
 		switch (e) {
-			case -1: cout << "Invalid ID" << endl; break;
-			case -2: cout << "Not in bounds" << endl; break;
-			case -3: cout << "Position occupied" << endl; break;
-			case -4: cout << "Deer in check" << endl; break;
-			case -5: cout << "Not in move set" << endl; break;
+			case INVALID_ID: cout << "Invalid ID" << endl; break;
+			case ALREADY_MOVED: cout << player_names[w2id(id)] << " has already moved this turn" << endl; break;
+			case OUT_OF_BOUNDS: cout << "Not in bounds" << endl; break;
+			case POSITION_OCCUPIED: cout << "Position occupied" << endl; break;
+			case DEER_IN_CHECK: cout << "Deer in check" << endl; break;
+			case INVALID_MOVE: cout << "Not in move set" << endl; break;
 		}
 		return false;
 	}
@@ -218,13 +229,17 @@ bool Game::move(int id, const coord &pos) {
 	// Move the player
 	// Remove the player
 	board[players[id].r][players[id].c] = -1;
-	// If the player is a wolf, remove its effect from the mask
+	// If the player is a wolf, mark it as moved and remove its effect from the mask
 	if (id >= deerc) {
+		moved[id] = true;
 		for (coord delta : wolf_moves) {
 			coord c = players[id] + delta;
 			if (!in_bounds(c)) { continue; }
 			wolf_mask[c.r][c.c]--;
 		}
+	} else {
+		// When the deer moves, reset wolf moves
+		for (int i = deerc; i < deerc+wolvesc; i++) { moved[i] = 0; }
 	}
 
 	// Place the player back in the new spot
@@ -250,19 +265,25 @@ bool Game::move(int id, const coord &pos) {
 bool Game::move_wolf(int wolf, const coord &pos) { return move(wolf + deerc, pos); }
 bool Game::move_deer(const coord &pos) { return move(0, pos); }
 
+GameState Game::game_over() {
+	// Deer wins if wolves run out of time
+	if (turns_remaining <= 0) { return DEER_VICTORY; }
+
+	// Wolves win if deer has nowhere to move
+	vector<vector<int>> get_deer_mask(false);
+	bool can_move = false;
+	if (!can_move) { return WOLF_VICTORY; }
+
+	return ONGOING;
+}
+
 // Given a grid of integers and a function that converts integers to strings,
 // print out board with labels.
 const void Game::print_board(const vector<vector<int>> &board, string (Game::*int_repr)(int)) {
 	// Calculate row and column marker widths
 	// Note that we actually need the ceiling, not the floor
 	int r_mark_w = log_floor(10, board.size()) + 1;
-	int c_mark_w = log_floor(26, board[0].size()) + 1;
-
-	// Calculate player positions to print their names
-	umap<coord, int> locs;
-	for (int i = 0; i < playersc; i++) {
-		locs[players[i]] = i;
-	}
+	int c_mark_w = log_floor(26, board[0].size()-1) + 1;
 
 	// Create row separator and column markers
 	static string sep = "";
@@ -294,9 +315,11 @@ const void Game::print_board(const vector<vector<int>> &board, string (Game::*in
 	for (int r = 0; r < board.size(); r++) {
 		cout << setw(r_mark_w+2) << right << r+1 << " |";
 		for (int c = 0; c < board[0].size(); c++) {
-			auto it = locs.find({r, c});
-			if (it != locs.end()) {
-				cout << player_names[(*it).second].substr(0, 3);
+			int loc = this->board[r][c];
+			if (loc != -1) {
+				string name = player_names[loc].substr(0, 3);
+				while (name.size() < 3) { name += ' '; }
+				cout << name;
 			} else {
 				cout << (this->*int_repr)(board[r][c]);
 			}
