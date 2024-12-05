@@ -1,0 +1,47 @@
+set dimensions 16 16
+set deer_turns_to_win 14
+set deer_moves 4 4 [
+....X....
+...X.X...
+.........
+.X..X..X.
+X..X.X..X
+.X..X..X.
+.........
+...X.X...
+....X....
+]
+set wolf_moves 2 2 [
+..X..
+.X.X.
+X.X.X
+.X.X.
+..X..
+]
+create deer Science! I8
+
+create wolf Lambda A4
+create wolf Vulpine B2
+create wolf Luna D1
+
+create wolf Testy M1
+create wolf ArcWand O2
+create wolf Cyrus P4
+
+create wolf Have P13
+create wolf Verbina O15
+create wolf Whfg M16
+
+create wolf Gray D16
+create wolf Campfire B15
+create wolf Vmark A13
+
+game start
+
+# Day 1
+move Vulpine C3
+move Campfire C14
+move Testy M3
+move ArcWand N3
+
+game show wolf_cover
