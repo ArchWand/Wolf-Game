@@ -23,15 +23,12 @@ create deer Science! I8
 create wolf Lambda A4
 create wolf Vulpine B2
 create wolf Luna D1
-
 create wolf Testy M1
 create wolf ArcWand O2
 create wolf Cyrus P4
-
 create wolf Have P13
 create wolf Verbina O15
 create wolf Whfg M16
-
 create wolf Gray D16
 create wolf Campfire B15
 create wolf Vmark A13
@@ -39,9 +36,114 @@ create wolf Vmark A13
 game start
 
 # Day 1
-move Vulpine C3
+move Vulpine C3 yip!
 move Campfire C14
-move Testy M3
+move Testy M3 awoo!
 move ArcWand N3
+move Lambda B5 schlorp!
+move Gray D14
+move Cyrus O5
+move Verbina N14 :3
+move Have N13
+move Luna E2 hiss!
+move Whfg L15
+move Vmark B12
 
-game show wolf_cover
+# Day 2
+move Science! H8
+move Science! H7 stamp.
+move Vmark B10 woof!
+move Lambda C6 gorp!
+move Cyrus N6 chirp!
+move Vulpine D4
+move Testy K3 meep!
+move Verbina M13 silly!
+move ArcWand L3
+move Luna F3 rawr!
+move Campfire C12
+
+# Day 3
+move Science! I10
+move Science! H10
+move Vmark D10
+move Cyrus M7
+move Verbina K13 :3
+move Vulpine D6
+move Have M12
+move Testy I3 beep!
+move Gray E13
+move Campfire E12
+move Lambda E6 yippie!
+move ArcWand J3
+move Luna G4 uwu
+move Whfg K14
+
+# Day 4
+move Science! I10
+move Science! H7 snort.
+move Lambda F7
+move Vmark F10
+move Luna H5 grrr!
+move Gray F12
+move Campfire G12
+move Verbina J12 growl!
+move Testy I5 mraa!
+move Cyrus K7
+move ArcWand J5
+move Vulpine F6
+move Whfg K12
+move Have M10
+
+# Day 5
+move Science! L7
+move Science! L3 snort.
+move Vulpine F4 stamp.
+move Vmark G9 woof!
+move Lambda F5 "meow"
+move Campfire H11 wimper
+move Testy I3
+move ArcWand L5
+move Luna I4
+move Verbina L12 b
+move Cyrus K5
+move Whfg M12
+move Have M8
+
+# Day 6
+move Science! O4
+move Science! P7
+move Verbina n12 ogos b
+move Vmark i9 aug
+move Lambda G4 3
+move Gray G11
+move Vulpine G5 ::::3
+move Campfire J11 whiiine
+move Testy K3 Jrcho :(
+move Cyrus M5
+move Luna K4
+move ArcWand N5
+
+# Day 7
+move Science! P3
+move Science! M2 stare.
+move Vmark I7
+move ArcWand O4
+move Testy L2 bites u
+move Cyrus O5
+move Verbina N10 inted
+move Lambda G2 >:(
+move Vulpine G3 woem
+move Luna K2 aruuu!
+move Campfire J9 bark...
+move Gray I11 papa
+move Have M6 Em
+
+# Day 8
+move Science! P1
+// move Science! P2 groan.
+move Vulpine H2
+move Lambda I2 bite
+move Vmark K7 stare.
+move Testy N2
+
+game show deer_cover

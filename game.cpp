@@ -75,7 +75,7 @@ string Game::int2deer_reach(int i) {
 		case 1: return " . ";
 		case 2: return "(-)";
 		case -2: return "<X>"; // Covered by wolf
-		default: return "???";
+		default: return "   ";
 	}
 }
 
@@ -172,8 +172,11 @@ vector<vector<int>> Game::get_deer_mask(bool show_wolves) {
 			if (wolf_mask[c.r][c.c]) { continue; } // Covered by a wolf
 			if (mask[c.r][c.c] != i) {
 				// Not already reached in this iteration
-				mask[c.r][c.c] = i;
 				next.push(c);
+				// Update only if not previously reachable
+				if (mask[c.r][c.c] == -1) {
+					mask[c.r][c.c] = i;
+				}
 			}
 		}
 
@@ -217,7 +220,7 @@ bool Game::move(int id, const coord &pos) {
 	if ((e = valid_move(id, pos)) != SUCCESS) {
 		switch (e) {
 			case INVALID_ID: cout << "Invalid ID" << endl; break;
-			case ALREADY_MOVED: cout << player_names[w2id(id)] << " has already moved this turn" << endl; break;
+			case ALREADY_MOVED: cout << player_names[id] << " has already moved this turn" << endl; break;
 			case OUT_OF_BOUNDS: cout << "Not in bounds" << endl; break;
 			case POSITION_OCCUPIED: cout << "Position occupied" << endl; break;
 			case DEER_IN_CHECK: cout << "Deer in check" << endl; break;
@@ -307,9 +310,6 @@ const void Game::print_board(const vector<vector<int>> &board, string (Game::*in
 		col_mark += '\n';
 	}
 
-	// Info header
-	cout << board.size() << "x" << board[0].size() << ", " << turns_remaining << " turns left\n";
-
 	// Print board
 	cout << col_mark << sep;
 	for (int r = 0; r < board.size(); r++) {
@@ -329,7 +329,26 @@ const void Game::print_board(const vector<vector<int>> &board, string (Game::*in
 	}
 	cout << col_mark << endl;
 }
-void Game::print_board() { print_board(board, &Game::int2player); }
-void Game::print_deer_cover() { print_board(get_deer_mask(false), &Game::int2deer_reach); }
-void Game::print_wolf_cover() { print_board(wolf_mask, &Game::int2wolf_reach); }
-void Game::print_combined_cover() { print_board(get_deer_mask(true), &Game::int2deer_reach); }
+void Game::print_board() {
+	cout << board.size() << "x" << board[0].size() << ", " << turns_remaining << " turns left" << endl;
+	print_board(board, &Game::int2player);
+}
+
+void Game::print_deer_cover() {
+	vector<vector<int>> mask = get_deer_mask(false);
+	int count = 0;
+	for (auto v : mask) for (int i : v) { if (i > 0) { count++; } }
+	cout << "Deer has " << count << " valid moves" << endl;
+	print_board(mask, &Game::int2deer_reach);
+}
+
+void Game::print_wolf_cover() {
+	int count = 0;
+	for (auto v : wolf_mask) for (int i : v) { if (i == 1) { count++; } }
+	cout << "Wolves cover " << count << " squares" << endl;
+	print_board(wolf_mask, &Game::int2wolf_reach);
+}
+
+void Game::print_combined_cover() {
+	print_board(get_deer_mask(true), &Game::int2deer_reach);
+}
